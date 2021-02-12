@@ -1,0 +1,240 @@
+﻿@page
+@model BugTracker.Pages.ReleasesModel
+@{
+    ViewData["Title"] = "Releases";
+    ViewData["UserId"] = Model.UserId;
+    ViewData["ProjectId"] = Model.ProjectId;
+}
+
+<div class="row justify-content-between">
+    <h5 class="text-secondary mb-2 col-4">@Model.Project.Name</h5>
+    <button class="btn btn-primary col-2" id="myBtn">Kreiraj novu verziju</button>
+</div>
+
+<hr class="mt-3 mb-3" />
+
+<form method="post">
+    <div class="row mb-4 align-items-center">
+        <div class="mr-3">Trenutno se prikazuju verzije koje su: </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" asp-for="@Model.Objavljene" type="checkbox" id="Objavljene1">
+            <label class="form-check-label">Objavljene</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" asp-for="@Model.Neobjavljene" type="checkbox" id="Neobjavljene2">
+            <label class="form-check-label">Neobjavljene</label>
+        </div>
+        <input type="hidden" asp-for="@Model.UserId" value="@Model.UserId" />
+        <input type="hidden" asp-for="@Model.ProjectId" value="@Model.ProjectId" />
+        <button type="submit" asp-page-handler="osvezi" class="btn btn-outline-success">Osvezi prikaz</button>
+    </div>
+</form>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Verzija</th>
+            <th scope="col">Status</th>
+            <th scope="col" style="width: 20%">Progres</th>
+            <th scope="col">Datum pocetka</th>
+            <th scope="col">Datum zavrsetka</th>
+            <th scope="col">Opis</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var release in Model.SelectedReleases)
+        {
+            <tr>
+                <td>@release.Version</td>
+                @if (release.Released)
+                {
+                    <td>
+                        <div class="text-center border border-success text-success">
+                            OBJAVLJENA
+                        </div>
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <div class="text-center border border-primary text-primary">
+                            NEOBJAVLJENA
+                        </div>
+                    </td>
+                }
+                @if (release.BrojTiketa == 0)
+                {
+                    <td>Trenutno nema tiketa</td>
+                }
+                else
+                {
+                    <td>
+                        <div class="progress" title="@($"DONE: {release.Done}\nIN PROGRESS: {release.InProgress}\nTO DO: {release.ToDo}")">
+                            <div class="progress-bar bg-success" role="progressbar" style="@($"width: {100*release.Done/release.BrojTiketa}%")" aria-valuenow="@($"{release.Done/release.BrojTiketa}")" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar" role="progressbar" style="@($"width: {100*release.InProgress/release.BrojTiketa}%")" aria-valuenow="@($"{release.InProgress/release.BrojTiketa}")" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </td>
+                }
+                @if (release.StartDate == null)
+                {
+                    <td></td>
+                }
+                else
+                {
+                    <td>@release.StartDate.ToShortDateString()</td>
+                }
+                @if (release.EndDate == null)
+                {
+                    <td></td>
+                }
+                else
+                {
+                    <td>@release.EndDate.ToShortDateString()</td>
+                }
+                <td>@release.Description</td>
+                @if (release.Released == false)
+                {
+                    <td>
+                        <form method="post">
+                            <input type="hidden" asp-for="@Model.UserId" value="@Model.UserId" />
+                            <input type="hidden" asp-for="@Model.ProjectId" value="@Model.ProjectId" />
+                            <button type="submit" asp-route-id="@release.Id.ToString()" asp-page-handler="objavi" class="btn btn-success">Objavi verziju</button>
+                        </form>
+                    </td>
+                }
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<div id="myModal" class="modal">
+
+    <!-- Modalna forma -->
+    <div class="modal-content">
+        <span class="close mb-2">&times;</span>
+        <h4 class="text-center mb-2">Kreiraj novu verziju</h4>
+        <form method="post">
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Verzija</label>
+                <div class="col-9">
+                    <input class="form-control" asp-for="@Model.Version" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Datum pocetka</label>
+                <div class="col-9">
+                    <input class="form-control" asp-for="@Model.StartDate" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Datum zavrsetka</label>
+                <div class="col-9">
+                    <input class="form-control" asp-for="@Model.EndDate" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Opis</label>
+                <div class="col-9">
+                    <input class="form-control" asp-for="@Model.Description" />
+                </div>
+            </div>
+            <input type="hidden" asp-for="@Model.UserId" value="@Model.UserId" />
+            <input type="hidden" asp-for="@Model.ProjectId" value="@Model.ProjectId" />
+            <button asp-page-handler="kreiraj" type="submit" class="btn btn-block btn-primary">Kreiraj</button>
+        </form>
+
+    </div>
+
+</div>
+
+<style>
+    .kartica {
+        background-color: gainsboro;
+        height: 180px;
+        width: 80%;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+    }
+
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+    }
+
+    @@keyframes animatetop {
+        from {
+            top: -300px;
+            opacity: 0
+        }
+
+        to {
+            top: 0;
+            opacity: 1
+        }
+    }
+
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+
+<script>
+
+    var modal = document.getElementById("myModal");
+
+
+    var btn = document.getElementById("myBtn");
+
+
+    var span = document.getElementsByClassName("close")[0];
+
+
+    btn.onclick = function () {
+        modal.style.display = "block";
+    }
+
+
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>

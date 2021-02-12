@@ -1,0 +1,60 @@
+﻿@page
+@model BugTracker.Pages.CreateSprintModel
+@{
+    ViewData["Title"] = "CreateSprint";
+    ViewData["UserId"] = Model.CurrentUser.Id.ToString();
+    ViewData["ProjectId"] = Model.CurrentProject.Id.ToString();
+}
+
+<h2 class="text-center mb-3">
+    @if (Model.Sprint.Id == MongoDB.Bson.ObjectId.Empty)
+    {
+        <span>Kreiraj sprint</span>
+    }
+    else
+    {
+        <span>Azuriraj sprint</span>
+    }
+</h2>
+
+<div class="row justify-content-center">
+    <div class="col-6">
+        <form method="post">
+            <div class="form-group row">
+                <label class="col-4 col-form-label">Ciljevi sprinta</label>
+                <div class="col-8">
+                    <input class="form-control" asp-for="@Model.Sprint.SprintGoals" value="@Model.Sprint.SprintGoals" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-4 col-form-label">Vreme pocetka</label>
+                <div class="col-8">
+                    <input class="form-control" asp-for="@Model.Sprint.StartDate" value="@Model.Sprint.StartDate" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-4 col-form-label">Vreme kraja</label>
+                <div class="col-8">
+                    <input class="form-control" asp-for="@Model.Sprint.EndDate" value="@Model.Sprint.EndDate" />
+                </div>
+            </div>
+
+            @if (Model.Sprint.Id == MongoDB.Bson.ObjectId.Empty)
+            {
+                <input type="hidden" class="form-control" asp-for="@Model.UserIdBackUp" value="@Model.CurrentUser.Id.ToString()" />
+                <input type="hidden" class="form-control" asp-for="@Model.Sprint.ProjectId" value="@Model.CurrentProject.Id.ToString()" />
+                <button type="submit" asp-page-handler="create" class="btn btn-block btn-primary">Kreiraj</button>
+            }
+            else
+            {
+                <input type="hidden" class="form-control" asp-for="@Model.UserIdBackUp" value="@Model.CurrentUser.Id.ToString()" />
+                <input type="hidden" class="form-control" asp-for="@Model.Sprint.ProjectId" value="@Model.CurrentProject.Id.ToString()" />
+                <input type="hidden" class="form-control" asp-for="@Model.SprintIdBackUp" value="@Model.Sprint.Id.ToString()" />
+                <button type="submit" asp-page-handler="update" class="btn btn-block btn-info">Azuriraj</button>
+            }
+
+
+
+        </form>
+    </div>
+</div>

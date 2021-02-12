@@ -1,0 +1,61 @@
+﻿@page
+@model BugTracker.Pages.CreateProjectModel
+@{
+    ViewData["Title"] = "My Projects";
+    ViewData["UserId"] = Model.CurrentUser.Id.ToString();
+}
+<script>
+    $('select').selectpicker();
+</script>
+
+<h2 class="text-center mb-3">
+    @if (Model.Project.Id == MongoDB.Bson.ObjectId.Empty)
+    {
+        <span>Kreiraj novi projekat</span>
+    }
+    else
+    {
+        <span>Azuriraj projekat</span>
+    }
+</h2>
+
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form method="post">
+            <div class="form-group row">
+                <label class="col-4 col-form-label">Ime projekta</label>
+                <div class="col-8">
+                    <input class="form-control" asp-for="@Model.Project.Name" value="@Model.Project.Name" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-4 col-form-label">Clanovi</label>
+                <div class="col-8">
+                    <select class="form-control selectpicker" style="display:inherit" data-live-search="true" asp-for="@Model.SelectedUsers" multiple>
+                        @foreach (var user in Model.AllUsers)
+                        {
+                            @if (user.Id != Model.CurrentUser.Id)
+                            {
+                                <option value="@user.Id.ToString()">@(user.Name + " " + user.SurName)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            @if (Model.Project.Id == MongoDB.Bson.ObjectId.Empty)
+            {
+                <input type="hidden" class="form-control" asp-for="@Model.Project.ProjectOwnerId" value="@Model.CurrentUser.Id.ToString()" />
+                <button type="submit" asp-page-handler="create" class="btn btn-block btn-primary">Kreiraj</button>
+            }
+            else
+            {
+                <input type="hidden" class="form-control" asp-for="@Model.Project.ProjectOwnerId" value="@Model.CurrentUser.Id.ToString()" />
+                <input type="hidden" class="form-control" asp-for="@Model.ProjectIdBackUp" value="@Model.Project.Id.ToString()" />
+                <button type="submit" asp-page-handler="update" class="btn btn-block btn-info">Azuriraj</button>
+            }
+
+
+        </form>
+    </div>
+</div>

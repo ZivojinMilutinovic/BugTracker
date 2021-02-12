@@ -1,0 +1,62 @@
+﻿@page
+@model BugTracker.Pages.MyProjectsModel
+@{
+    ViewData["Title"] = "My Projects";
+}
+
+<div class="row mb-3" style="justify-content:space-between">
+    <div class="col-8">
+        <h1>Moji projekti</h1>
+    </div>
+    <div class="col-2" style="padding-top:10px">
+        <a class="btn-primary" style="padding:7px" href="/CreateProject?user_id=@Model.CurrentUser.Id.ToString()">Novi projekat</a>
+    </div>
+</div>
+
+@if (Model.Projects.Count == 0)
+{
+    <h2>Trenutno niste deo nijednog projekta.</h2>
+}
+else
+{
+    <div class="row mb-2">
+        <div class="col-4">Naziv projekta</div>
+        <div class="col-3">Sef projekta</div>
+        <div class="col-3">Datum pocetka</div>
+        <div class="col-1"></div>
+        <div class="col-1"></div>
+    </div>
+    @foreach (var project in Model.Projects)
+    {
+        <div class="row mb-1" style="border:1px solid gainsboro; height:60px; align-content: center">
+            <div class="col-4">
+                <a href="/ActiveSprint?user_id=@(Model.CurrentUser.Id.ToString())&project_id=@(project.Id.ToString())">
+                    @project.Name
+                </a>
+            </div>
+            <div class="col-3">
+                @(Model.ProjectsOwners[project.Id.ToString()].Name + " " + Model.ProjectsOwners[project.Id.ToString()].SurName)
+                @*<a href="/User">
+                        @(Model.ProjectsOwners[project.Id.ToString()].Name + " " + Model.ProjectsOwners[project.Id.ToString()].SurName)
+                    </a>*@
+            </div>
+            <div class="col-3">
+                @project.StartDate.ToShortDateString()
+            </div>
+            @if (project.ProjectOwnerId == Model.CurrentUser.Id.ToString())
+            {
+                <div class="col-1">
+                    <a href="CreateProject?user_id=@Model.CurrentUser.Id.ToString()&project_id=@project.Id.ToString()" class="btn btn-info">Azuriraj</a>
+                </div>
+                <div class="col-1">
+                    <form method="post">
+                        <input type="hidden" class="form-control" asp-for="@Model.ForDelete" value="@project.Id.ToString()" />
+                        <input type="hidden" class="form-control" asp-for="@Model.UserIdBackUp" value="@Model.CurrentUser.Id.ToString()" />
+                        <button class="btn btn-danger" asp-page-handler="delete" asp-route-id="@Model.CurrentUser.Id.ToString()">Obrisi</button>
+                    </form>
+                </div>
+            }
+        </div>
+
+    }
+}

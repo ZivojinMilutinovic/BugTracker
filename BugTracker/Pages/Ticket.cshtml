@@ -1,0 +1,135 @@
+﻿@page
+@model BugTracker.Pages.TicketModel
+@{
+    ViewData["Title"] = "Ticket";
+    ViewData["UserId"] = Model.CurrentUser.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+}
+<h4 class="text-center mb-2">Kreiraj novi tiket</h4>
+<form method="post">
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Naslov tiketa</label>
+        <div class="col-9">
+            <input class="form-control" asp-for="@Model.Ticket.Summary" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Tip</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.TicketType">
+                <option value="" disabled>Izaberite...</option>
+                @foreach (var type in Model.TicketTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Stanje tiketa</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.CurrentTicketState">
+                <option value="" disabled>Izaberite...</option>
+                @foreach (var type in Model.ListaStanjaTiketa)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Prioritet</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.Priority">
+                <option value="" disabled>Izaberite...</option>
+                @foreach (var type in Model.PriorityTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Dodeli tiket</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.AssigneeId">
+                <option value="" disabled>Izaberite...</option>
+                @foreach (var user in Model.AllUsers)
+                {
+                    <option value="@user.Id.ToString()">@user.Name @user.SurName</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Povezani tiket</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.LinkedTicketId">
+                <option value="" disabled>Izaberite...</option>
+                <option value="@null">Nepovezan</option>
+                @foreach (var ticket in Model.AllTickets)
+                {
+                    <option value="@ticket.Id.ToString()">@ticket.Summary</option>
+                }
+
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Sprint</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.SprintId">
+                <option value="" disabled>Izaberite...</option>
+                <option value="@null">Nedodeljen</option>
+                @foreach (var sprint in Model.AllSprints)
+                {
+                    <option value="@sprint.Id.ToString()">Sprint @sprint.SprintNumber</option>
+                }
+
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Labela</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.Label">
+                <option value="" disabled>Izaberite...</option>
+                @foreach (var label in Model.Labels)
+                {
+                    <option value="@label"> @label</option>
+                }
+
+            </select>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Verzija</label>
+        <div class="col-9">
+            <select class="form-control" asp-for="@Model.Ticket.ReleaseId">
+                <option value="" disabled>Izaberite...</option>
+                <option value="@null">Nedodeljen</option>
+                @foreach (var release in Model.AllReleases)
+                {
+
+                    <option value="@release.Id.ToString()"> @release.Version</option>
+                }
+
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-form-label">Opis tiketa</label>
+        <textarea class="form-control" asp-for="@Model.Ticket.Description"></textarea>
+    </div>
+    <input type="hidden" asp-for="@Model.SCurrentTicketId" value="@Model.Ticket.Id.ToString()" />
+    <input type="hidden" asp-for="@Model.SCurrentProjectId" value="@Model.Project.Id.ToString()" />
+    <input type="hidden" asp-for="@Model.SCurrentUserId" value="@Model.CurrentUser.Id.ToString()" />
+    <input type="hidden" asp-for="@Model.OldReleaseId" value="@Model.OldReleaseId" />
+    <input type="hidden" asp-for="@Model.OldSprintId" value="@Model.OldSprintId" />
+    
+    <div class="row ">
+        <button type="submit" asp-page-handler="update" class="btn mr-1 d-block col-3  btn-primary">Azuriraj</button>
+        <button type="submit" asp-page-handler="delete" class="btn ml-1 d-block col-3   btn-danger">Izbrisi</button>
+    </div>
+   
+</form>

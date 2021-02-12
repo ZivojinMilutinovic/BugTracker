@@ -1,0 +1,306 @@
+﻿@page
+@model BugTracker.Pages.ActiveSprintModel
+@{
+    ViewData["Title"] = "Active Sprint";
+    ViewData["UserId"] = Model.CurrentUser.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+}
+<style>
+    .kartica {
+        background-color: gainsboro;
+        height: 220px;
+        width: 80%;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+    }
+
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+        animation-name: animatetop;
+        animation-duration: 0.4s
+    }
+
+    @@keyframes animatetop {
+        from {
+            top: -300px;
+            opacity: 0
+        }
+
+        to {
+            top: 0;
+            opacity: 1
+        }
+    }
+
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+
+<!--
+<h1>Stranica koja prikazuje trenutni sprint,ako je sprint 0(projekat tek kreiran)
+    prikazuje link koji vodi na backlog za tu stranicu gde se moze kreirati sprint</h1>
+    -->
+@if (Model.ActiveSprint == null)
+{
+
+    <div class="row">
+        <h3 class="mr-4">Nijedan sprint nije zapocet</h3>
+        <a class="btn btn-primary" href="/CreateSprint?user_id=@Model.CurrentUser.Id&project_id=@Model.Project.Id">
+            KREIRAJ SPRINT
+        </a>
+    </div>
+
+
+
+}
+else
+{
+    <div class="row">
+        <h5 class="text-secondary mb-2 col-5">@Model.Project.Name</h5>
+        <div class="col-7"><button class="btn btn-primary" id="myBtn">Kreiraj tiket</button></div>
+    </div>
+
+    <div class="row justify-content-lg-between">
+        <h5 class="col">Sprint @Model.ActiveSprint.SprintNumber</h5>
+        <div>
+            <i class="bi bi-clock mr-2"></i> <span class="mr-2">@Model.VratiVreme() dana ostalo</span>
+            @if (Model.Project.ProjectOwnerId.Equals(Model.CurrentUser.Id.ToString()))
+            {
+                <form method="post">
+                    <input type="hidden" asp-for="@Model.SCurrentSprintId" value="@Model.ActiveSprint.Id.ToString()" />
+                    <input type="hidden" asp-for="@Model.SCurrentProjectId" value="@Model.Project.Id.ToString()" />
+                    <input type="hidden" asp-for="@Model.SCurrentUserId" value="@Model.CurrentUser.Id.ToString()" />
+                    <button type="submit" asp-page-handler="complete" class="btn btn-secondary">Zavrsi sprint</button>
+                </form>
+                
+            }
+
+        </div>
+    </div>
+    <div class="text-secondary">@Model.ActiveSprint.SprintGoals</div>
+}
+<hr class="mt-3 mb-5" />
+<div class="row mb-3">
+    @foreach (var stanje in Model.ListaStanjaTiketa)
+    {
+        <div class="col mr-1 ml-1">@stanje</div>
+    }
+</div>
+
+
+@foreach (var ticket in Model.AllTickets)
+{
+    
+<div class="row mb-3">
+    @foreach (var stanje in Model.ListaStanjaTiketa)
+    {
+
+
+        @if (ticket.CurrentTicketState.Equals(stanje))
+        {
+    
+        <div class="card col mr-1 ml-1 border-dark bg-light" 
+             onclick="window.location.href='/Ticket?user_id=@ViewData["UserId"]&project_id=@ViewData["ProjectId"]&ticket_id=@ticket.Id'"
+             style="cursor:pointer;height:220px;width:80%;overflow:hidden">
+            <div class="card-header">
+                @ticket.Summary
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">@ticket.TicketType</h5>
+                <p class="card-text">@ticket.Description</p>
+
+            </div>
+        </div>
+   
+            
+        }
+        else
+        {
+            <div class="col mr-1 ml-1 kartica ">&nbsp;</div>
+        }
+    }
+</div>
+}
+
+
+
+
+
+
+
+<div id="myModal" class="modal">
+
+    <!-- Modalna forma -->
+    <div class="modal-content">
+        <span class="close mb-2">&times;</span>
+        <h4 class="text-center mb-2">Kreiraj novi tiket</h4>
+        <form method="post">
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Naslov tiketa</label>
+                <div class="col-9">
+                    <input class="form-control" asp-for="@Model.Ticket.Summary" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Tip</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.TicketType">
+                        <option value="" disabled>Izaberite...</option>
+                        @foreach (var type in Model.TicketTypes)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Prioritet</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.Priority">
+                        <option value="" disabled>Izaberite...</option>
+                        @foreach (var type in Model.PriorityTypes)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Dodeli tiket</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.AssigneeId">
+                        <option value="" disabled>Izaberite...</option>
+                        <option value="@null">Nedodeljen</option>
+                        @foreach (var user in Model.AllUsers)
+                        {
+                            <option value="@user.Id.ToString()">@user.Name @user.SurName</option>
+                        }
+
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Povezani tiket</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.LinkedTicketId">
+                        <option value="" disabled>Izaberite...</option>
+                        <option value="@null">Nije povezan</option>
+                        @foreach (var ticket in Model.AllTickets)
+                        {
+                            <option value="@ticket.Id.ToString()">@ticket.Summary</option>
+                        }
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Sprint</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.SprintId">
+                        <option value="" disabled>Izaberite...</option>
+                        <option value="@null">Nedodeljen</option>
+                        @foreach (var sprint in Model.AllSprints)
+                        {
+                            <option value="@sprint.Id.ToString()">Sprint @sprint.SprintNumber</option>
+                        }
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Labela</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.Label">
+                        <option value="" disabled>Izaberite...</option>
+                        @foreach (var label in Model.Labels)
+                        {
+                            <option value="@label"> @label</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-3 col-form-label">Verzija</label>
+                <div class="col-9">
+                    <select class="form-control" asp-for="@Model.Ticket.ReleaseId">
+                        <option value="" disabled>Izaberite...</option>
+                        <option value="@null">Nedodeljen</option>
+                        @foreach (var release in Model.AllReleases)
+                        {
+                            <option value="@release.Id.ToString()"> @release.Version</option>
+                        }
+
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-form-label">Opis tiketa</label>
+                <textarea class="form-control" asp-for="@Model.Ticket.Description"></textarea>
+            </div>
+            <input type="hidden" asp-for="@Model.SCurrentProjectId" value="@Model.Project.Id.ToString()" />
+            <input type="hidden" asp-for="@Model.SCurrentUserId" value="@Model.CurrentUser.Id.ToString()" />
+            <button type="submit" class="btn btn-block btn-primary">Kreiraj</button>
+        </form>
+
+    </div>
+
+</div>
+
+<script>
+
+    var modal = document.getElementById("myModal");
+
+
+    var btn = document.getElementById("myBtn");
+
+
+    var span = document.getElementsByClassName("close")[0];
+
+
+    btn.onclick = function () {
+        modal.style.display = "block";
+    }
+
+
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>

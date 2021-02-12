@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BugTracker</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">BugTracker</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        @if (!ViewData["Title"].ToString().Equals("Home page") && !ViewData["Title"].ToString().Equals("Register"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="/MyProjects?user_id=@ViewData["UserId"]">My projects</a>
+                            </li>
+                            @if (!ViewData["Title"].ToString().Equals("My Projects"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/ActiveSprint?user_id=@ViewData["UserId"]&project_id=@ViewData["ProjectId"]">Active sprint</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Backlog?user_id=@ViewData["UserId"]&project_id=@ViewData["ProjectId"]">Backlog</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" href="/Releases?user_id=@ViewData["UserId"]&project_id=@ViewData["ProjectId"]">Releases</a>
+                                </li>
+                            }
+                        }
+                        else if (ViewData["Title"].ToString().Equals("Home page"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Register">Register</a>
+                            </li>
+                        }
+                        <!--
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                        </li>
+                            -->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2021 - BugTracker
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

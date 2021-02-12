@@ -1,0 +1,160 @@
+﻿@page
+@model BugTracker.Pages.BacklogModel
+@{
+    ViewData["Title"] = "Backlog";
+    ViewData["UserId"] = Model.CurrentUser.Id.ToString();
+    ViewData["ProjectId"] = Model.CurrentProject.Id.ToString();
+}
+
+<div class="row mb-3">
+    <h1>Backlog</h1>
+</div>
+
+@foreach (var sprint in Model.NotCompletedSprints)
+{
+    <h3 class="mt-3 mb-2">Sprint @sprint.SprintNumber</h3>
+    @if (sprint.TicketsIds.Count == 0)
+    {
+        <h6>Nema tiketa za ovaj sprint.</h6>
+    }
+    else
+    {
+        @foreach (var ticket in Model.Tickets.Where(x => x.SprintId == sprint.Id.ToString()))
+        {
+            <div class="row mb-1" style="border:1px solid gainsboro; height:50px; align-content: center">
+                <div class="col-4" style="font-weight:bold">
+                    <a href="/Ticket?user_id=@(Model.CurrentUser.Id.ToString())&project_id=@(Model.CurrentProject.Id.ToString())&ticket_id=@(ticket.Id.ToString())">
+                        @ticket.Summary
+                    </a>
+                </div>
+                <div class="col-2">
+                    @ticket.TicketType
+                </div>
+                @if (ticket.Priority == "Critical")
+                {
+                    <div class="col-1" style="color:red">
+                        @ticket.Priority
+                    </div>
+                }
+                else if (ticket.Priority == "Major")
+                {
+                    <div class="col-1" style="color:orangered">
+                        @ticket.Priority
+                    </div>
+                }
+                else if (ticket.Priority == "Normal")
+                {
+                    <div class="col-1" style="color:green">
+                        @ticket.Priority
+                    </div>
+                }
+                else if (ticket.Priority == "Minor")
+                {
+                    <div class="col-1" style="color:darkcyan">
+                        @ticket.Priority
+                    </div>
+                }
+                else
+                {
+                    <div class="col-1" style="color:darkblue">
+                        @ticket.Priority
+                    </div>
+                }
+                <div class="col-3">
+                    @{
+                        Models.User assignee = new Models.User();
+                        if (ticket.AssigneeId != null)
+                        {
+                            assignee = Model.Assignees.First(x => x.Key == ticket.AssigneeId).Value;
+                        }
+                    }
+                    @if (assignee.Id != MongoDB.Bson.ObjectId.Empty)
+                    {
+                        @(assignee.Name + " " + assignee.SurName)
+                    }
+                    else
+                    {
+                        @("Nedodeljen")
+                    }
+                </div>
+                <div class="col-2">
+                    @ticket.CurrentTicketState
+                </div>
+            </div>
+        }
+
+    }
+}
+
+<div class="row mt-4 mb-3" style="display:flex; justify-content: flex-end">
+    <div class="col-2" style="padding-top:10px">
+        <a class="btn btn-primary" style="padding:7px"
+           href="/CreateSprint?user_id=@(Model.CurrentUser.Id.ToString())&project_id=@(Model.CurrentProject.Id.ToString())">
+            Novi sprint
+        </a>
+    </div>
+</div>
+
+@foreach (var ticket in Model.Tickets.Where(x => x.SprintId == null))
+{
+    <div class="row mb-1" style="border:1px solid gainsboro; height:50px; align-content: center">
+        <div class="col-4" style="font-weight:bold">
+            <a href="/Ticket?user_id=@(Model.CurrentUser.Id.ToString())&project_id=@(Model.CurrentProject.Id.ToString())&ticket_id=@(ticket.Id.ToString())">
+                @ticket.Summary
+            </a>
+        </div>
+        <div class="col-2">
+            @ticket.TicketType
+        </div>
+        @if (ticket.Priority == "Critical")
+        {
+            <div class="col-1" style="color:red">
+                @ticket.Priority
+            </div>
+        }
+        else if (ticket.Priority == "Major")
+        {
+            <div class="col-1" style="color:orangered">
+                @ticket.Priority
+            </div>
+        }
+        else if (ticket.Priority == "Normal")
+        {
+            <div class="col-1" style="color:green">
+                @ticket.Priority
+            </div>
+        }
+        else if (ticket.Priority == "Minor")
+        {
+            <div class="col-1" style="color:darkcyan">
+                @ticket.Priority
+            </div>
+        }
+        else
+        {
+            <div class="col-1" style="color:darkblue">
+                @ticket.Priority
+            </div>
+        }
+        <div class="col-3">
+            @{
+                Models.User assignee = new Models.User();
+                if (ticket.AssigneeId != null)
+                {
+                    assignee = Model.Assignees.First(x => x.Key == ticket.AssigneeId).Value;
+                }
+            }
+            @if (assignee.Id != MongoDB.Bson.ObjectId.Empty)
+            {
+                @(assignee.Name + " " + assignee.SurName)
+            }
+            else
+            {
+                @("Nedodeljen")
+            }
+        </div>
+        <div class="col-2">
+            @ticket.CurrentTicketState
+        </div>
+    </div>
+}
